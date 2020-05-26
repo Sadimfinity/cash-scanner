@@ -21,7 +21,7 @@ def initialize_images(detector, denominations):
 
 def main():
     url = 'http://192.168.0.11:8080/shot.jpg'
-    MIN_MATCH_COUNT=60
+    MIN_MATCH_COUNT=80
 
     detector=cv2.xfeatures2d.SIFT_create()
 
@@ -41,7 +41,6 @@ def main():
         for trainDesc in trainDescs:
             match = flann.knnMatch(queryDesc, trainDesc, k=2)
             matches.append(match)
-
         goodMatches = []
         for i in range(len(matches)):
             goodMatch = []
@@ -53,24 +52,32 @@ def main():
                     goodMatches[i].append(m)
             i = i + 1
         i = 0
+        arri = []
         for goodMatch in goodMatches:
-            if(len(goodMatch)>MIN_MATCH_COUNT):
+            leng = len(goodMatch)
+            arri.append(leng)
+        maxPointsIndexes = np.argpartition(arri, -2)[-2:]
+        i = 0
+        print(len(goodMatches[maxPointsIndexes[0]]))
+        print(len(goodMatches[maxPointsIndexes[1]]))
+        for i in range(len(maxPointsIndexes)):
+            if(len(goodMatches[maxPointsIndexes[i]])>MIN_MATCH_COUNT):
                 tp=[]
                 qp=[]
-                for m in goodMatch:
-                    trainKP = trainKPs[i]
+                for m in goodMatches[maxPointsIndexes[i]]:
+                    trainKP = trainKPs[maxPointsIndexes[i]]
                     tp.append(trainKP[m.trainIdx].pt)
                     qp.append(queryKP[m.queryIdx].pt)
                 tp,qp=np.float32((tp,qp))
                 H,status=cv2.findHomography(tp,qp,cv2.RANSAC,3.0)
-                trainImg = trainImgs[i]
+                trainImg = trainImgs[maxPointsIndexes[i]]
                 h,w,_=trainImg.shape
                 trainBorder=np.float32([[[0,0],[0,h-1],[w-1,h-1],[w-1,0]]])
                 queryBorder=cv2.perspectiveTransform(trainBorder,H)
                 # convert the grayscale image to binary image
                 ret,thresh = cv2.threshold(QueryImg,127,255,0)
-                cv2.polylines(QueryImgBGR,[np.int32(queryBorder)],True,(255,0,0),5)
-                total = total + denominations[int(math.floor(i/2))]
+                #cv2.polylines(QueryImgBGR,[np.int32(queryBorder)],True,(255,0,0),5)
+                total = total + denominations[int(math.floor(maxPointsIndexes[i]/2))]
             i = i + 1
         print('Hay ' + str(total) + ' mil pesos')
         cv2.imshow('result',QueryImgBGR)
