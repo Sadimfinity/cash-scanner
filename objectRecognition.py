@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #--------------------------------------------------------------------------
 #------- PLANTILLA DE CÓDIGO ----------------------------------------------
 #------- Proyecto final de PDI-------------------------------------------
@@ -12,7 +13,6 @@
 #------- Importamos los paquetes necesarios ---------------------------------
 #--------------------------------------------------------------------------
 
-# -*- coding: utf-8 -*-
 from multiprocessing import Process
 import cv2
 import numpy as np
@@ -223,7 +223,6 @@ def main():
         QueryImgBGR = cv2.imdecode(img_arr, -1)
         cv2.imshow('Imagen',QueryImgBGR)
         if cv2.waitKey(10)==ord('q'):
-            cv2.destroyAllWindows()
             run_in_parallel(scan_cash, display_loading)
         if cv2.waitKey(13)==13:
             break
